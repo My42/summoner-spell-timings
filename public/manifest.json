@@ -1,0 +1,44 @@
+{
+  "manifest_version":1,
+  "type":"WebApp",
+  "meta":{
+      "name":"Demo App",
+      "version": "1.0.0",
+      "minimum-overwolf-version": "0.204.0",
+      "author":"Vincent Mesquita",
+      "icon":"icons/IconMouseOver.png",
+      "icon_gray":"icons/IconMouseNormal.png",
+      "launcher_icon": "icons/desktop-icon.ico",
+      "description":"In-game app for helping with summoner spell timings"
+  },
+  "data": {
+    "start_window": "in_game",
+    "hotkeys": {
+      "sample_app_ts_showhide": {
+        "title": "Show/Hide In-Game Window",
+        "action-type": "toggle",
+        "default": "Ctrl+F"
+      }
+    },
+    "force_browser": "user",
+    "windows": {
+      "in_game": {
+        "file": "in_game.html",
+        "in_game_only": true,
+        "focus_game_takeover": "ReleaseOnHidden",
+        "focus_game_takeover_release_hotkey": "sample_app_ts_showhide",
+        "transparent": true,
+        "override_on_update": true,
+        "size": {
+          "width": 150,
+          "height": 300
+        }
+      }
+    },
+    "developer": {
+      "enable_auto_refresh": true,
+      "reload_delay": 1000,
+      "filter": "*.*"
+    }
+  }
+}
