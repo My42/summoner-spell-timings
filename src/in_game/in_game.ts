@@ -5,20 +5,19 @@ import {
 
 
 import { AppWindow } from "../AppWindow";
-import { kWindowNames, kGamesFeatures } from "../consts";
+import { kWindowNames, kGamesFeatures, summonerSpellCooldown } from "../consts";
 
 class InGame extends AppWindow {
   private static _instance: InGame;
   private _gameEventsListener: OWGamesEvents;
   private _playersListElement: HTMLElement
   private _currentPlayer: {champion: string, skinId: number, summoner: string, team: 'Order' | 'Chaos'}
+  private _clocks = {}
 
   private constructor() {
     super(kWindowNames.inGame);
 
     this._playersListElement = document.getElementById('players-list')
-
-    //this._infoLog = document.getElementById('infoLog');
   }
 
   public static instance() {
@@ -48,41 +47,74 @@ class InGame extends AppWindow {
   }
 
   private onInfoUpdates(info) {
-    console.log('info =', info)
     if (info.game_info?.teams) {
       this._currentPlayer = JSON.parse(decodeURI(info.game_info?.teams))[0]
-
-      console.log('currentPlayerInfo =', this._currentPlayer)
     }
 
     if (info.live_client_data.all_players) {
       const players = JSON.parse(info.live_client_data.all_players)
 
-      console.log('allPlayers =', players)
-
       for (const player of players) {
         if (player.team === this._currentPlayer.team.toUpperCase()) {
           continue
         }
-        const championName = (player.championName.charAt(0).toUpperCase() + player.championName.slice(1).toLowerCase()).replace(/\W/, '')
+        this._clocks[player.summonerName] = [0, 0]
 
-        const playerContainer = document.createElement('div');
+        const championName = (player.championName.charAt(0).toUpperCase() + player.championName.slice(1).toLowerCase()).replace(new RegExp(/\W/, 'g'), '')
+        const summonnerSpells = [player.summonerSpells.summonerSpellOne.rawDisplayName.split('_')[2], player.summonerSpells.summonerSpellTwo.rawDisplayName.split('_')[2]]
+
+        const playerContainer = document.createElement('div')
         const avatarContainer = document.createElement('div')
         const summonerSpellContainer = document.createElement('div')
         const avatarImg = document.createElement('img')
-        const summonerSpellImgs = [document.createElement('img'), document.createElement('img')]
+        const summonerSpellContainers = [document.createElement('div'), document.createElement('div')]
 
-        playerContainer.setAttribute('class', 'player-container')
-        avatarContainer.setAttribute('class', 'avatar')
-        summonerSpellContainer.setAttribute('class', 'summoner-spell')
+        playerContainer.classList.add('player-container')
+        playerContainer.id = player.summonerName.replace(new RegExp(/\W/, 'g'), '')
+        avatarContainer.classList.add('avatar')
+        summonerSpellContainer.setAttribute('class', 'summoner-spells')
         avatarImg.setAttribute('src', `https://ddragon.leagueoflegends.com/cdn/12.6.1/img/champion/${championName}.png`)
-        summonerSpellImgs[0].setAttribute('src', `https://ddragon.leagueoflegends.com/cdn/12.6.1/img/spell/${player.summonerSpells.summonerSpellOne.rawDisplayName.split('_')[2]}.png`)
-        summonerSpellImgs[1].setAttribute('src', `https://ddragon.leagueoflegends.com/cdn/12.6.1/img/spell/${player.summonerSpells.summonerSpellTwo.rawDisplayName.split('_')[2]}.png`)
 
-        console.log('summonerSpellImgs =', summonerSpellImgs.map(e => e.getAttribute('src')))
+        for (const [index, summonerSpellContainer] of summonerSpellContainers.entries()) {
+          summonerSpellContainer.setAttribute('class', 'summoner-spell-img')
+          summonerSpellContainer.style.backgroundImage = `url("https://ddragon.leagueoflegends.com/cdn/12.6.1/img/spell/${summonnerSpells[index]}.png")`
+
+          const clock = document.createElement('div')
+
+          clock.id = `clock-${index}`
+
+          summonerSpellContainer.append(clock)
+        }
+
+        for (const [index, c] of summonerSpellContainers.entries()) {
+          c.addEventListener('click', () => {
+            if (this._clocks[player.summonerName][index].intervalId !== undefined) {
+              clearInterval(this._clocks[player.summonerName][index].intervalId)
+            }
+
+            const summonerCooldown = summonerSpellCooldown[summonnerSpells[index]]
+           
+            c.childNodes[0].textContent = summonerCooldown
+
+            this._clocks[player.summonerName][index] = {summonerCooldown}
+
+            c.childNodes[0].textContent = (this._clocks[player.summonerName][index].summonerCooldown--).toString()
+
+            const intervalId = setInterval(() => {
+              c.childNodes[0].textContent = (this._clocks[player.summonerName][index].summonerCooldown--).toString()
+
+              if (this._clocks[player.summonerName][index].summonerCooldown < 0) {
+                c.childNodes[0].textContent = undefined
+                clearInterval(intervalId)
+              }
+            }, 1000)
+
+            this._clocks[player.summonerName][index].intervalId = intervalId
+          })
+        }
 
         avatarContainer.append(avatarImg)
-        summonerSpellContainer.append(...summonerSpellImgs)
+        summonerSpellContainer.append(...summonerSpellContainers)
 
         playerContainer.append(avatarContainer)
         playerContainer.append(summonerSpellContainer)

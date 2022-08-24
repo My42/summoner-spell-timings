@@ -1,3 +1,19 @@
+export const summonerSpellCooldown = {
+  SummonerBarrier: 210,
+  SummonerBoost: 210,
+  SummonerDot: 180,
+  SummonerExhaust: 210,
+  SummonerFlash: 300,
+  SummonerHaste: 210,
+  SummonerHeal: 240,
+  SummonerMana: 144,
+  SummonerPoroRecall: 0,
+  SummonerPoroThrow: 0,
+  SummonerSmite: 90,
+  SummonerSnowball: 48,
+  SummonerTeleport: 360,
+}
+
 export const kGamesFeatures = new Map<number, string[]>([
   // Fortnite
   [
