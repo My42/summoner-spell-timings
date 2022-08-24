@@ -64,6 +64,7 @@ class InGame extends AppWindow {
         if (player.team === this._currentPlayer.team.toUpperCase()) {
           continue
         }
+        const championName = (player.championName.charAt(0).toUpperCase() + player.championName.slice(1).toLowerCase()).replace(/\W/, '')
 
         const playerContainer = document.createElement('div');
         const avatarContainer = document.createElement('div')
@@ -74,7 +75,7 @@ class InGame extends AppWindow {
         playerContainer.setAttribute('class', 'player-container')
         avatarContainer.setAttribute('class', 'avatar')
         summonerSpellContainer.setAttribute('class', 'summoner-spell')
-        avatarImg.setAttribute('src', `https://ddragon.leagueoflegends.com/cdn/12.6.1/img/champion/${player.championName.replace(/\W/, '')}.png`)
+        avatarImg.setAttribute('src', `https://ddragon.leagueoflegends.com/cdn/12.6.1/img/champion/${championName}.png`)
         summonerSpellImgs[0].setAttribute('src', `https://ddragon.leagueoflegends.com/cdn/12.6.1/img/spell/${player.summonerSpells.summonerSpellOne.rawDisplayName.split('_')[2]}.png`)
         summonerSpellImgs[1].setAttribute('src', `https://ddragon.leagueoflegends.com/cdn/12.6.1/img/spell/${player.summonerSpells.summonerSpellTwo.rawDisplayName.split('_')[2]}.png`)
 
